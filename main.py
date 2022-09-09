@@ -9,6 +9,9 @@ import numpy as np
 from imutils.object_detection import non_max_suppression
 from background_subtraction import background_subtraction
 from detect_people import detect_people
+from detect_and_draw_faces import detect_face,draw_faces
+from recognize_and_label import put_label_on_face,recognize_face
+
 # TODO
 # break to frame process
 
@@ -40,16 +43,22 @@ if __name__ == '__main__':
                     # Printing frame for debugging purpose
                     if not grabbed: break
                     cv2.imshow("Frame",previous_frame)
-                    cv2.waitKey(200)
+                    cv2.waitKey(20)
                     # end
                     frame_resized = imutils.resize(frame, width=min(800, frame.shape[1]))
                     frame_resized_grayscale = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
 
                     temp = background_subtraction(previous_frame, frame_resized_grayscale, min_area)
                     if temp == 1:
-                        frame_processed = detect_people(frame_resized)
+                        frame_processed =  detect_people(frame_resized)
+                        faces = detect_face(frame_resized_grayscale)
+                        if len(faces) > 0:
+                            frame_processed = draw_faces(frame_processed, faces)
+                            label = recognize_face(frame_resized, faces)
+                            frame_processed = put_label_on_face(frame_processed, faces, label)
+                        
                         cv2.imshow("Frame Selected",frame_processed)
-                        cv2.waitKey(200)
+                        cv2.waitKey(20)
                     else:
                         print("a frame dropped")
 
